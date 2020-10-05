@@ -1,25 +1,27 @@
-let store = {
-  user: { name: "Student" },
-  apod: "",
+const store = Immutable.Map({
+  name: "Student",
   rovers: [],
   rover_pic_data: [],
-};
+});
 
-const getRovers = (roverData) => {
-  updateStore(store, { rovers: roverData }, "mainDisplay");
+const getRovers = (roverData, state) => {
+  updateStore(state, { rovers: roverData }, "mainDisplay");
 };
 
 const roverDataOnLoad = () => {
-  fetch("http://localhost:3000/rovers")
+  fetch("http://localhost:4000/rovers")
     .then((data) => data.json())
-    .then((res) => getRovers(res.JsonParsedData.rovers));
+    .then((res) => getRovers(res.JsonParsedData.rovers, store))
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 // add our markup to the page
 const root = document.getElementById("root");
 
-const updateStore = (store, newState, page) => {
-  store = Object.assign(store, newState);
+const updateStore = (state, newState, page) => {
+  store = Immutable.merge(state, newState);
   render(root, store, page);
 };
 
@@ -74,12 +76,12 @@ const mainDisplay = (state) => `
         <div class="main__heading">
           <header class="load-display">Exploring Mars</header>
           <main class="load-display">
-            ${Greeting(state.user.name)}
+            ${Greeting(state.get("name"))}
           </main>
         </div>
         <h2 class="sub__heading"> Pick A Rover To Explore: </h2>
         <div class="rover__data">  
-          ${state.rovers.map(displayRover).join("")}
+          ${state.get("rovers").map(displayRover).join("")}
         </div>  
         ${footer()}
     `;
@@ -100,6 +102,7 @@ const displayPictures = (roverPic) => {
 
 const pictureParent = (state) => `
   <h1>${state.rover_pic_data[0].rover.name} Rover</h1>
+  <a href="/" class="back_btn"> go back </a>
   <main class="picture_main">${state.rover_pic_data
     .map(displayPictures)
     .join("")}</main>`;
@@ -111,7 +114,7 @@ const error = (status) => `
 window.addEventListener("click", (event) => {
   const roverName = store.rovers.map((rover) => rover.name);
   if (roverName.includes(event.target.id)) {
-    fetch(`http://localhost:3000/rovers/${event.target.id}`)
+    fetch(`http://localhost:4000/rovers/${event.target.id}`)
       .then((res) => {
         if (res.status === 200) {
           return res.json();
@@ -126,7 +129,7 @@ window.addEventListener("click", (event) => {
         render(root, store, "pictureParent");
       })
       .catch((res) => {
-        render(root, res.status, "error");
+        if (res.status === 500) render(root, res.status, "error");
       });
   }
 });
