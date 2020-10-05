@@ -1,38 +1,103 @@
 /* -------------------  MOBILE  --------------------- */
-
+html,
 body {
-  display: flex;
-  flex-direction: column;
-  font-family: Arial;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  font-family: "Righteous", cursive;
 }
 
-header {
-  /* header styles */
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-main {
-  flex: 1;
-  padding: 20px;
+.main__heading {
+  position: relative;
+  height: 35rem;
+  color: #ffffff;
+  background-image: url("../1781.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-size: 2em;
 }
 
-footer {
-  /* footer styles */
+.sub__heading {
+  text-align: center;
+}
+
+.rover__data {
+  position: relative;
+  width: 85%;
+  height: 100%;
+  margin-left: 5%;
+  margin-right: 15%;
+}
+
+.rover__data section {
+  margin-bottom: 3rem;
+  border: 2px solid #ffffff;
+  border-radius: 10%;
+  background-color: #f5d020;
+  background-image: linear-gradient(315deg, #f5d020 0%, #f53803 74%);
+  color: black;
+  padding-left: 2rem;
+}
+
+.rover__data section:hover {
+  background-color: #f5d020;
+  background-image: linear-gradient(315deg, #f53803 0%, #f5d020 74%);
+}
+
+.rover_image {
+  width: 60%;
+  height: 30%;
+  margin-left: 20%;
 }
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
   /* use mobile */
+  .rover__data section {
+    border-radius: 3%;
+    padding-left: 35%;
+  }
+
+  .picture_main div p {
+    text-align: center;
+  }
 }
 
 /* -------------------  DESKTOP  -------------------- */
 
 @media (min-width: 1224px) {
   /* use mobile */
+  .rover__data {
+    display: grid;
+    grid-template-columns: auto auto auto;
+  }
+
+  .rover__data section {
+    padding: 10%;
+  }
+
+  .picture_main {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+  }
+
+  .main__heading {
+    color: black;
+  }
 }
 
 /* -------------------  LARGE SCREENS  -------------- */
 
 @media (min-width: 1824px) {
-  /* use mobile */
+  .main__heading {
+    font-size: 4em;
+  }
 }
