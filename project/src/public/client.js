@@ -26,6 +26,8 @@ const updateStore = (store, newState, page) => {
 const render = async (root, state, page) => {
   if (page === "mainDisplay") {
     root.innerHTML = App(state, mainDisplay);
+  } else if (page === "error") {
+    root.innerHTML = App(state, error);
   } else root.innerHTML = App(state, pictureParent);
 };
 
@@ -102,6 +104,9 @@ const pictureParent = (state) => `
     .map(displayPictures)
     .join("")}</main>`;
 
+const error = (status) => `
+    <div> ${status} No data to return </div>
+`;
 // ------------------------------------------------------  API CALLS
 window.addEventListener("click", (event) => {
   const roverName = store.rovers.map((rover) => rover.name);
@@ -119,6 +124,9 @@ window.addEventListener("click", (event) => {
           "pictureParent"
         );
         render(root, store, "pictureParent");
+      })
+      .catch((res) => {
+        render(root, res.status, "error");
       });
   }
 });
