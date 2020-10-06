@@ -1,6 +1,5 @@
-const store = Immutable.Map({
+let store = Immutable.Map({
   name: "Student",
-  rovers: [],
   rover_pic_data: [],
 });
 
@@ -12,16 +11,14 @@ const roverDataOnLoad = () => {
   fetch("http://localhost:4000/rovers")
     .then((data) => data.json())
     .then((res) => getRovers(res.JsonParsedData.rovers, store))
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => render(root, err, "error"));
 };
 
 // add our markup to the page
 const root = document.getElementById("root");
 
 const updateStore = (state, newState, page) => {
-  store = Immutable.merge(state, newState);
+  store = state.merge(newState);
   render(root, store, page);
 };
 
@@ -59,15 +56,25 @@ const Greeting = (name) => {
     `;
 };
 
-const displayRover = (roverInfo) => {
+const displayRover = (
+  max_date,
+  name,
+  other,
+  status,
+  sol,
+  launch_date,
+  landing_date,
+  da,
+  total_photos
+) => {
   return `
-    <section id=${roverInfo.name}>
-        <h2>${roverInfo.name} </h2>
-        <p>Launch Date: ${roverInfo.launch_date}</p>
-        <p>Land On Mar Date: ${roverInfo.landing_date}</p>
-        <p>Rover Status: ${roverInfo.status}</p>
-        <p>Photos Captured : ${roverInfo.total_photos}</p>
-        <p> Most Recent Photos: ${roverInfo.max_date}</p>
+    <section id=${name}>
+        <h2>${name} </h2>
+        <p>Launch Date: ${launch_date}</p>
+        <p>Land On Mar Date: ${landing_date}</p>
+        <p>Rover Status: ${status}</p>
+        <p>Photos Captured : ${total_photos}</p>
+        <p> Most Recent Photos: ${max_date}</p>
     </section>
     `;
 };
@@ -81,30 +88,54 @@ const mainDisplay = (state) => `
         </div>
         <h2 class="sub__heading"> Pick A Rover To Explore: </h2>
         <div class="rover__data">  
-          ${state.get("rovers").map(displayRover).join("")}
+          ${
+            state.get("rovers") === undefined
+              ? "Loading..."
+              : state
+                  .get("rovers")
+                  .keySeq()
+                  .toArray()
+                  .map((rover) =>
+                    displayRover(
+                      ...state.get("rovers").get(rover).valueSeq().toArray()
+                    )
+                  )
+                  .join("")
+          }
         </div>  
         ${footer()}
     `;
 
 const footer = () => `<footer></footer>`;
 
-const displayPictures = (roverPic) => {
+const displayPictures = (id, sol, camera, img_src, earth_date, rover) => {
   return `
     <div>
-      <img class="rover_image"src='${roverPic.img_src}'/>
+      <img class="rover_image"src='${img_src}'/>
       <p>
-        <em>${roverPic.earth_date}</em>
-        <em>Camera Name: ${roverPic.camera.full_name}</em>
+        <em>${earth_date}</em>
+        <em>Camera Name: ${camera.get("full_name")}</em>
     </div>
   
   `;
 };
 
 const pictureParent = (state) => `
-  <h1>${state.rover_pic_data[0].rover.name} Rover</h1>
+  <h1>${state
+    .get("rover_pic_data")
+    .get("0")
+    .get("rover")
+    .get("name")} Rover</h1>
   <a href="/" class="back_btn"> go back </a>
-  <main class="picture_main">${state.rover_pic_data
-    .map(displayPictures)
+  <main class="picture_main">${state
+    .get("rover_pic_data")
+    .keySeq()
+    .toArray()
+    .map((rover) =>
+      displayPictures(
+        ...state.get("rover_pic_data").get(rover).valueSeq().toArray()
+      )
+    )
     .join("")}</main>`;
 
 const error = (status) => `
@@ -112,7 +143,11 @@ const error = (status) => `
 `;
 // ------------------------------------------------------  API CALLS
 window.addEventListener("click", (event) => {
-  const roverName = store.rovers.map((rover) => rover.name);
+  const roverName = store
+    .get("rovers")
+    .keySeq()
+    .toArray()
+    .map((rover) => store.get("rovers").get(rover).valueSeq().toArray()[1]);
   if (roverName.includes(event.target.id)) {
     fetch(`http://localhost:4000/rovers/${event.target.id}`)
       .then((res) => {
@@ -123,10 +158,9 @@ window.addEventListener("click", (event) => {
       .then((data) => {
         updateStore(
           store,
-          { rover_pic_data: data.rover.photos },
+          { rover_pic_data: data.rover.latest_photos },
           "pictureParent"
         );
-        render(root, store, "pictureParent");
       })
       .catch((res) => {
         if (res.status === 500) render(root, res.status, "error");

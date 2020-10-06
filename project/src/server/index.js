@@ -24,14 +24,16 @@ const getAllRoverData = async (roverData) => {
   var store2 = {};
   for (rover of roverData) {
     await fetch(
-      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover.name.toLowerCase()}/photos?sol=1000&api_key=${
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/${rover.name.toLowerCase()}/latest_photos?api_key=${
         process.env.API_KEY
       }`
     )
       .then(responseParser)
       .then((dataObject) => {
         store2[rover.name] = dataObject.JsonParsedData;
-        // store = store.set(rover.name, store2[rover.name]);
+      })
+      .catch((err) => {
+        displayData(err);
       });
   }
   const roverNames = Object.keys(store2);
